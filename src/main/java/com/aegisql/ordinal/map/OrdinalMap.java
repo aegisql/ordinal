@@ -3,32 +3,235 @@ package com.aegisql.ordinal.map;
 import com.aegisql.ordinal.Ordinal;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.*;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.stream.Collectors;
 
 public class OrdinalMap <K extends Ordinal<K>, V> implements Map<K,V>, Cloneable, Serializable {
 
-    private Entry<K,V>[] entry;
+    public class OrdinalEntry<K  extends Ordinal<K>,V> implements Ordinal<K>, Entry<K,V> {
+
+        private final K key;
+        private V value;
+
+        public OrdinalEntry(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        @Override
+        public int ordinal() {
+            return key.ordinal();
+        }
+
+        @Override
+        public int maxOrdinal() {
+            return key.maxOrdinal();
+        }
+
+        @Override
+        public K[] values() {
+            return null;
+        }
+
+        @Override
+        public K getKey() {
+            return key;
+        }
+
+        @Override
+        public V getValue() {
+            return value;
+        }
+
+        @Override
+        public V setValue(V value) {
+            V old = this.value;
+            this.value = value;
+            return old;
+        }
+
+        @Override
+        public String toString() {
+            return "OrdinalEntry{" +
+                    "key=" + key +
+                    ", value=" + value +
+                    '}';
+        }
+    }
+
+    private class UnmodifiableOrdinalSet<T extends Ordinal<T>> implements Set<T> {
+
+        private final T[] elements;
+        private final int size;
+
+        public UnmodifiableOrdinalSet(T[] elements) {
+            this.elements = elements;
+            int size = 0;
+            for(int i = 0; i < elements.length; i++) {
+                T element = elements[i];
+                if(element != null) {
+                    size++;
+                }
+            }
+            this.size = size;
+        }
+
+        @Override
+        public int size() {
+            return this.size;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return size==0;
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            K key = (K) o;
+            return elements[key.ordinal()] != null;
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+
+            return new Iterator<T>() {
+
+                int pos = 0;
+
+                @Override
+                public boolean hasNext() {
+                    for(int i = pos; i < elements.length; i++) {
+                        if(elements[i] != null) {
+                            pos = i;
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                @Override
+                public T next() {
+                    for(;pos < elements.length; pos++) {
+                        if(elements[pos] != null) {
+                            return elements[pos++];
+                        }
+                    }
+                    throw new NoSuchElementException("You've reached the end of the iterator");
+                }
+            };
+        }
+
+        @Override
+        public Object[] toArray() {
+            Object[] array = new Object[size];
+            int i = 0;
+            for(T t:elements) {
+                if(t==null) continue;
+                array[i++] = t;
+            }
+            return array;
+        }
+
+        @Override
+        public <T1> T1[] toArray(T1[] a) {
+            T1[] array = (T1[]) Array.newInstance(a.getClass().getComponentType(), size);
+            int i = 0;
+            for(T t:elements) {
+                if(t==null) continue;
+                T1 element = (T1) t;
+                array[i++] = element;
+            }
+            return array;
+        }
+
+        @Override
+        public boolean add(T t) {
+            throw new UnsupportedOperationException("UnmodifiableOrdinalSet does not support add(t)");
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            throw new UnsupportedOperationException("UnmodifiableOrdinalSet does not support remove(o)");
+        }
+
+        @Override
+        public boolean containsAll(Collection<?> c) {
+            for(Object o:c) {
+                if(o==null) return false;
+                if(o instanceof Ordinal) {
+                    Ordinal ordinal = (Ordinal) o;
+                    if(ordinal.maxOrdinal() >= elements.length) return false;
+                    if(elements[ordinal.ordinal()] == null) return false;
+                    return elements[ordinal.ordinal()].equals(ordinal);
+                } else {
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends T> c) {
+            throw new UnsupportedOperationException("UnmodifiableOrdinalSet does not support addAll(a)");
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            throw new UnsupportedOperationException("UnmodifiableOrdinalSet does not support retainAll(c)");
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            throw new UnsupportedOperationException("UnmodifiableOrdinalSet does not support removeAll(c)");
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException("UnmodifiableOrdinalSet does not support clear()");
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder("{");
+            for(int i = 0; i < elements.length; i++) {
+                if(elements[i]!=null) {
+                    sb.append(elements[i]).append(",");
+                }
+            }
+            sb.deleteCharAt(sb.lastIndexOf(","));
+            sb.append("}");
+            return sb.toString();
+        }
+    }
+
+    private OrdinalEntry<K,V>[] entry;
 
     private int size = 0;
 
+    private final Class<K> keyType;
+
     public OrdinalMap(K[] elements) {
         Objects.requireNonNull(elements,"OrdinalMap requires sample of elements");
-        entry = new SimpleEntry[elements.length];
+        entry = new OrdinalEntry[elements.length];
+        keyType = (Class<K>) elements[0].getClass();
     }
 
     public OrdinalMap(Collection<K> elements) {
         Objects.requireNonNull(elements,"OrdinalMap requires sample of elements");
-        entry = new SimpleEntry[elements.size()];
+        entry = new OrdinalEntry[elements.size()];
+        keyType = (Class<K>) elements.iterator().next().getClass();
     }
 
     public OrdinalMap(Class<K> cls, int size) {
-        entry = new SimpleEntry[size];
+        entry = new OrdinalEntry[size];
+        keyType = cls;
     }
 
     public OrdinalMap(K instance) {
-        entry = new SimpleEntry[instance.maxOrdinal()+1];
+        entry = new OrdinalEntry[instance.maxOrdinal()+1];
+        keyType = (Class<K>) instance.getClass();
     }
 
     @Override
@@ -65,7 +268,7 @@ public class OrdinalMap <K extends Ordinal<K>, V> implements Map<K,V>, Cloneable
     @Override
     public V put(K key, V value) {
         int ord = ((K) key).ordinal();
-        SimpleEntry<K,V> e = new SimpleEntry<>(key,value);
+        OrdinalEntry<K,V> e = new OrdinalEntry<>(key,value);
         var prevEntry = entry[ord];
         V prevValue = prevEntry == null ? null : prevEntry.getValue();
         entry[ord] = e;
@@ -102,8 +305,17 @@ public class OrdinalMap <K extends Ordinal<K>, V> implements Map<K,V>, Cloneable
 
     @Override
     public Set<K> keySet() {
-        Set<K> kSet = entrySet().stream().map(Entry::getKey).collect(Collectors.toSet());
-        return Collections.unmodifiableSet(kSet);
+        K[] keys = (K[]) Array.newInstance(keyType,entry.length);
+        for(int i = 0; i < entry.length; i++) {
+            Entry<K, V> kvEntry = entry[i];
+            if(kvEntry != null) {
+                keys[i] = kvEntry.getKey();
+            } else {
+                keys[i] = null;
+            }
+        }
+        Set<K> set = new UnmodifiableOrdinalSet<>(keys);
+        return Collections.unmodifiableSet(set);
     }
 
     @Override
@@ -114,13 +326,9 @@ public class OrdinalMap <K extends Ordinal<K>, V> implements Map<K,V>, Cloneable
 
     @Override
     public Set<Entry<K, V>> entrySet() {
-        Set<Entry<K,V>> eSet = new LinkedHashSet<>();
-        for(int i = 0; i < entry.length; i++) {
-            if(entry[i] != null) {
-                eSet.add(entry[i]);
-            }
-        }
-        return Collections.unmodifiableSet(eSet);
+        OrdinalEntry<K, V>[] clone = entry.clone();
+        var set = new UnmodifiableOrdinalSet<>((Ordinal[])clone);
+        return set;
     }
 
     @Override

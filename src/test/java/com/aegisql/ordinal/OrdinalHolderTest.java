@@ -49,6 +49,11 @@ class OrdinalHolderTest {
         assertEquals(mon,oh2[0]);
         var oh3 = OrdinalHolder.wrap("MONDAY","tuesday","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY","SUNDAY");
         assertNotEquals(mon,oh3[0]);
+
+        assertEquals(mon.next(),tue);
+        assertEquals(wed.prev(),tue);
+        assertNull(mon.prev());
+        assertNull(sun.next());
     }
 
 }

@@ -9,60 +9,38 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class EnumeratedFields<T extends EnumeratedFields<T>> implements Ordinal<T>, Serializable {
+public abstract class OrdinalFields<T extends OrdinalFields<T>>  implements Ordinal<T>, Serializable {
 
     protected int ordinal;
     protected int maxOrdinal;
-
     protected String name;
-
     protected GenericTree genericTree;
 
-    protected EnumeratedFields(String name) {
+    protected OrdinalFields(String name) {
         this();
         this.name = name;
     }
 
-    protected EnumeratedFields() {
-        List<T> values = new ArrayList<>();
-        List<String> names = new ArrayList<>();
-        List<GenericTree> genericTreeCollectors = new ArrayList<>();
-        int expected = 0;
-        int actual = 1;//count this
+    protected OrdinalFields() {
+        List<StaticFieldInfo<T>> staticFieldInfos = new ArrayList<>();
         for (Field field : getClass().getFields()) {
-            try {
                 Class<?> fieldType = field.getType();
                 if(fieldType != this.getClass()) {
                     continue;
                 }
-                expected++;
-                names.add(field.getName());
-                genericTreeCollectors.add(new GenericTree(field.getGenericType()));
-                Object val = field.get(null);
-                if(val == null) {
-                    continue;
-                }
-                actual++;
-                values.add((T) val);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
+                staticFieldInfos.add(new StaticFieldInfo<T>((T) this,field));
         }
-        if(expected == actual) {
-            values.add((T) this); //add this as last initiated
-            T[] array  = (T[]) Array.newInstance(values.get(0).getClass(),values.size());
-            for (int j = 0; j < values.size(); j++) {
-                array[j] = values.get(j);
-            }
-            for (int i = 0; i < values.size(); i++) {
-                T val = values.get(i);
-                val.maxOrdinal = actual-1;
-                val.ordinal = i;
-                val.values = array;
-                val.genericTree = genericTreeCollectors.get(i);
-                if(val.name == null) {
-                    val.name = names.get(i); //default name, if not set
-                }
+        T[] array  = (T[]) Array.newInstance(staticFieldInfos.get(0).getValue().getClass(),staticFieldInfos.size());
+        for(int i = 0; i < staticFieldInfos.size(); i++) {
+            StaticFieldInfo<T> fieldInfo = staticFieldInfos.get(i);
+            T value = fieldInfo.getValue();
+            array[i] = fieldInfo.getValue();
+            value.values = array;
+            value.ordinal = i;
+            value.maxOrdinal = staticFieldInfos.size();
+            value.genericTree = fieldInfo.getGenericTree();
+            if(value.name == null) {
+                value.name = fieldInfo.getFieldName();
             }
         }
 
@@ -72,8 +50,7 @@ public abstract class EnumeratedFields<T extends EnumeratedFields<T>> implements
 
     @Override
     public T[] values() {
-        T[] copy = Arrays.copyOf(values, values.length);
-        return copy;
+        return values.clone();
     }
 
     @Override
@@ -94,7 +71,7 @@ public abstract class EnumeratedFields<T extends EnumeratedFields<T>> implements
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        EnumeratedFields<?> that = (EnumeratedFields<?>) o;
+        OrdinalFields<?> that = (OrdinalFields<?>) o;
         return ordinal == that.ordinal;
     }
 
@@ -112,7 +89,7 @@ public abstract class EnumeratedFields<T extends EnumeratedFields<T>> implements
         return name;
     }
 
-    public static <T extends EnumeratedFields<? extends T>> T[] values(Class<? extends T> forClass) {
+    public static <T extends OrdinalFields<? extends T>> T[] values(Class<? extends T> forClass) {
         for (Field field : forClass.getFields()) {
             try {
                 Class<?> fieldType = field.getType();
@@ -123,7 +100,7 @@ public abstract class EnumeratedFields<T extends EnumeratedFields<T>> implements
                 if(val == null) {
                     continue;
                 }
-                return ((T)val).values;
+                return ((T)val).values();
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
@@ -131,7 +108,7 @@ public abstract class EnumeratedFields<T extends EnumeratedFields<T>> implements
         return null;
     }
 
-    public static <T extends EnumeratedFields<? extends T>> T valueOf(Class<? extends T> forClass, String name) {
+    public static <T extends OrdinalFields<? extends T>> T valueOf(Class<? extends T> forClass, String name) {
         for (Field field : forClass.getFields()) {
             try {
                 Class<?> fieldType = field.getType();
@@ -152,8 +129,9 @@ public abstract class EnumeratedFields<T extends EnumeratedFields<T>> implements
         return null;
     }
 
-    public static <T extends EnumeratedFields<? extends T>> T valueOf(Class<? extends T> forClass, int pos) {
+    public static <T extends OrdinalFields<? extends T>> T valueOf(Class<? extends T> forClass, int pos) {
         return values(forClass)[pos];
     }
 
 }
+

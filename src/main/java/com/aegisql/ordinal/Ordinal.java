@@ -24,4 +24,25 @@ public interface Ordinal<T extends Ordinal<T>>  extends Comparable<Ordinal<T>> {
     default Stream<T> valuesStream() {
         return List.of(values()).stream();
     }
+
+    default T next() {
+        if(ordinal() < maxOrdinal()) {
+            return values()[ordinal()+1];
+        } else {
+            return null;
+        }
+    }
+
+    default T prev() {
+        if(ordinal() > 0) {
+            return values()[ordinal()-1];
+        } else {
+            return null;
+        }
+    }
+
+    default T valueAt(int pos) {
+        return values()[pos];
+    }
+
 }

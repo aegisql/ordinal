@@ -9,9 +9,9 @@ import java.util.List;
 public class GenericTree {
 
     private final String name;
-    private  Class aClass;
+    private  final Class aClass;
 
-    private boolean isParametrized;
+    private final boolean isParametrized;
     private final List<GenericTree> genericSubTrees = new ArrayList<>();
 
     public static GenericTree getGeneticInfo(Class cls, String fieldName) {
@@ -29,23 +29,23 @@ public class GenericTree {
 
     public GenericTree(Type type) {
         name = type.getTypeName();
+        Class aClass = null;
         if(type instanceof ParameterizedType) {
             this.isParametrized = true;
             ParameterizedType parameterizedType = (ParameterizedType) type;
             try {
-                this.aClass = Class.forName(parameterizedType.getRawType().getTypeName());
+                aClass = Class.forName(parameterizedType.getRawType().getTypeName());
             } catch (ClassNotFoundException e) {
-                this.aClass = null;
             }
             collectGenericType((ParameterizedType) type, this);
         } else {
             this.isParametrized = false;
             try {
-                this.aClass = Class.forName(type.getTypeName());
+                aClass = Class.forName(name);
             } catch (ClassNotFoundException e) {
-                this.aClass = null;
             }
         }
+        this.aClass = aClass;
     }
 
     private void collectGenericType(ParameterizedType parameterizedType, GenericTree parent) {

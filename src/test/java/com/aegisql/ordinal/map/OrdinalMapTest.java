@@ -3,6 +3,10 @@ package com.aegisql.ordinal.map;
 import com.aegisql.ordinal.OrdinalHolder;
 import org.junit.jupiter.api.Test;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+
 import static com.aegisql.ordinal.Ordinals.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,12 +45,39 @@ class OrdinalMapTest {
 
         assertEquals(300,map.remove(WEDNESDAY));
         assertEquals(6,map.size());
+
+        var ordinalHolders = map.keySet();
+        System.out.println(ordinalHolders);
+        assertTrue(ordinalHolders.contains(THURSDAY));
+        assertFalse(ordinalHolders.contains(WEDNESDAY));
+
+        map.entrySet().iterator().forEachRemaining((e)->{
+            System.out.println(e.getKey()+"="+e.getValue());
+        });
+
+        Object[] array = ordinalHolders.toArray();
+        OrdinalHolder<String>[] array1 = ordinalHolders.toArray(DAYS);
+        assertEquals(6,array.length);
+        assertEquals(6,array1.length);
+
         assertFalse(map.isEmpty());
         System.out.println(map);
         map.clear();
         assertTrue(map.isEmpty());
         assertEquals(0,map.size());
         System.out.println(map);
+    }
+
+    @Test
+    public void understandIteratorTest() {
+        List<Integer> l = List.of(1, 2, 3);
+        Iterator<Integer> i = l.iterator();
+
+        assertEquals(1,i.next());
+        assertEquals(2,i.next());
+        assertEquals(3,i.next());
+        assertThrows(NoSuchElementException.class,i::next);
+
     }
 
 }
