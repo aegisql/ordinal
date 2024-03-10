@@ -2,7 +2,6 @@ package com.aegisql.ordinal.reflection;
 
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.TypeVariable;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,6 +31,10 @@ class GenericTreeTest {
         var gt = GenericTree.getGeneticInfo(getClass(),"number");
         assertFalse(gt.isParametrized());
         System.out.println(gt);
+
+        gt.deepTest(1);
+        gt.deepTest(1,-1);
+
     }
 
     @Test
@@ -42,6 +45,14 @@ class GenericTreeTest {
         assertFalse(sub.isParametrized());
         System.out.println(gt);
         System.out.println(sub);
+
+        gt.deepTest(new LinkedList<>());
+        gt.deepTest(new ArrayList<>(),-1);
+
+
+        gt.deepTest(1,GenericTree.SIMPLE_COLLECTION_PATH);
+        gt.deepTest(1,0,-1);
+
     }
 
     @Test
@@ -52,6 +63,15 @@ class GenericTreeTest {
         System.out.println(gt);
         System.out.println(sub1);
         System.out.println(sub2);
+
+        gt.deepTest(new HashMap<>());
+        gt.deepTest(new LinkedHashMap<>(),-1);
+
+        gt.deepTest("one",GenericTree.SIMPLE_MAP_KEY_PATH);
+        gt.deepTest("one",0,-1);
+        gt.deepTest(1,GenericTree.SIMPLE_MAP_VAL_PATH);
+        gt.deepTest(1,1,-1);
+
     }
 
     @Test
@@ -66,6 +86,19 @@ class GenericTreeTest {
         System.out.println(sub21);
 
         assertEquals(2,gt.getGenericSubTrees().size());
+
+        gt.deepTest(new HashMap<>());
+        gt.deepTest(new LinkedHashMap<>(),-1);
+
+        gt.deepTest("one",0);
+        gt.deepTest("one",0,-1);
+        gt.deepTest(new LinkedList<>(),1);
+        gt.deepTest(new ArrayList<>(),1,-1);
+
+        gt.deepTest(1,1,0);
+        gt.deepTest(1,1,0,-1);
+
+
     }
 
     @Test

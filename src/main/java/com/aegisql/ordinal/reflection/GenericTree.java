@@ -5,8 +5,13 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class GenericTree {
+
+    public static final int[] SIMPLE_COLLECTION_PATH = new int[]{0};
+    public static final int[] SIMPLE_MAP_KEY_PATH = new int[]{0};
+    public static final int[] SIMPLE_MAP_VAL_PATH = new int[]{1};
 
     private final String name;
     private  final Class aClass;
@@ -91,6 +96,36 @@ public class GenericTree {
         }
 
         return sb.toString();
+    }
+
+    public void deepTest(Object o, int... path) {
+        if(o==null) {
+            return;
+        }
+        if(path == null || path.length == 0 || path[0] == -1) {
+            test(aClass,o);
+            return;
+        }
+        int pos = path[0];
+            getGenericTree(pos).deepTest(o,shift(path));
+    }
+
+    private void test(Class cls, Object val) {
+        if(val != null) {
+            var valClass = val.getClass();
+            if( ! cls.isAssignableFrom(valClass)) {
+                throw new RuntimeException("Class "+valClass+" is not assignable from "+cls);
+            }
+        }
+    }
+
+    protected static int[] shift(int[] array) {
+        if(array == null || array.length==0) {
+            throw new IllegalArgumentException("Array is null or empty");
+        }
+        int[] newArray = new int[array.length-1];
+        System.arraycopy(array, 1, newArray, 0, array.length - 1);
+        return newArray;
     }
 
 }

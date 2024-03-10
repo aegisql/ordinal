@@ -37,7 +37,7 @@ public abstract class OrdinalFields<T extends OrdinalFields<T>>  implements Ordi
             array[i] = fieldInfo.getValue();
             value.values = array;
             value.ordinal = i;
-            value.maxOrdinal = staticFieldInfos.size();
+            value.maxOrdinal = staticFieldInfos.size()-1;
             value.genericTree = fieldInfo.getGenericTree();
             if(value.name == null) {
                 value.name = fieldInfo.getFieldName();
@@ -65,6 +65,14 @@ public abstract class OrdinalFields<T extends OrdinalFields<T>>  implements Ordi
 
     public GenericTree getGenericTree() {
         return genericTree;
+    }
+
+    public GenericTree getParameterTree() {
+        return genericTree.getGenericTree(0);
+    }
+
+    public Class<T> getParameterType() {
+        return getParameterTree().getaClass();
     }
 
     @Override
