@@ -5,10 +5,10 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class GenericTree {
 
+    public static final int[] ROOT_PATH = new int[]{};
     public static final int[] SIMPLE_COLLECTION_PATH = new int[]{0};
     public static final int[] SIMPLE_MAP_KEY_PATH = new int[]{0};
     public static final int[] SIMPLE_MAP_VAL_PATH = new int[]{1};
@@ -102,7 +102,7 @@ public class GenericTree {
         if(o==null) {
             return;
         }
-        if(path == null || path.length == 0 || path[0] == -1) {
+        if(path == null || path.length == 0) {
             test(aClass,o);
             return;
         }

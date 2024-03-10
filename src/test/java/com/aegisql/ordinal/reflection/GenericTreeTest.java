@@ -33,7 +33,8 @@ class GenericTreeTest {
         System.out.println(gt);
 
         gt.deepTest(1);
-        gt.deepTest(1,-1);
+
+        assertThrows(RuntimeException.class,()->{gt.deepTest("ONE");});
 
     }
 
@@ -46,12 +47,10 @@ class GenericTreeTest {
         System.out.println(gt);
         System.out.println(sub);
 
-        gt.deepTest(new LinkedList<>());
-        gt.deepTest(new ArrayList<>(),-1);
-
-
+        gt.deepTest(new LinkedList<>(),GenericTree.ROOT_PATH);
         gt.deepTest(1,GenericTree.SIMPLE_COLLECTION_PATH);
-        gt.deepTest(1,0,-1);
+
+        assertThrows(RuntimeException.class,()->{gt.deepTest("ONE",GenericTree.SIMPLE_COLLECTION_PATH);});
 
     }
 
@@ -65,12 +64,12 @@ class GenericTreeTest {
         System.out.println(sub2);
 
         gt.deepTest(new HashMap<>());
-        gt.deepTest(new LinkedHashMap<>(),-1);
 
         gt.deepTest("one",GenericTree.SIMPLE_MAP_KEY_PATH);
-        gt.deepTest("one",0,-1);
         gt.deepTest(1,GenericTree.SIMPLE_MAP_VAL_PATH);
-        gt.deepTest(1,1,-1);
+
+        assertThrows(RuntimeException.class,()->{gt.deepTest(1,GenericTree.SIMPLE_MAP_KEY_PATH);});
+        assertThrows(RuntimeException.class,()->{gt.deepTest("ONE",GenericTree.SIMPLE_MAP_VAL_PATH);});
 
     }
 
@@ -88,15 +87,11 @@ class GenericTreeTest {
         assertEquals(2,gt.getGenericSubTrees().size());
 
         gt.deepTest(new HashMap<>());
-        gt.deepTest(new LinkedHashMap<>(),-1);
 
         gt.deepTest("one",0);
-        gt.deepTest("one",0,-1);
         gt.deepTest(new LinkedList<>(),1);
-        gt.deepTest(new ArrayList<>(),1,-1);
 
         gt.deepTest(1,1,0);
-        gt.deepTest(1,1,0,-1);
 
 
     }
