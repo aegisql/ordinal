@@ -52,8 +52,13 @@ class OrdinalHolderTest {
 
         assertEquals(mon.next(),tue);
         assertEquals(wed.prev(),tue);
-        assertNull(mon.prev());
-        assertNull(sun.next());
+        assertThrows(IndexOutOfBoundsException.class,mon::prev);
+        assertThrows(IndexOutOfBoundsException.class,sun::next);
+
+        for(var day:mon) {
+            System.out.println("day="+day);
+        }
+
     }
 
 }

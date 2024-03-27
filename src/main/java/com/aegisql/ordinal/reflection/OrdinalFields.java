@@ -1,18 +1,16 @@
 package com.aegisql.ordinal.reflection;
 
+import com.aegisql.ordinal.AbstractOrdinal;
 import com.aegisql.ordinal.Ordinal;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public abstract class OrdinalFields<T extends OrdinalFields<T>>  implements Ordinal<T>, Serializable {
+public abstract class OrdinalFields<T extends OrdinalFields<T>> extends AbstractOrdinal<T> implements Serializable {
 
-    protected int ordinal;
-    protected int maxOrdinal;
     protected String name;
     protected GenericTree genericTree;
 
@@ -30,37 +28,21 @@ public abstract class OrdinalFields<T extends OrdinalFields<T>>  implements Ordi
                 }
                 staticFieldInfos.add(new StaticFieldInfo<T>((T) this,field));
         }
-        T[] array  = (T[]) Array.newInstance(staticFieldInfos.get(0).getValue().getClass(),staticFieldInfos.size());
+        T[] array  = (T[]) Array.newInstance(staticFieldInfos.getFirst().getValue().getClass(),staticFieldInfos.size());
         for(int i = 0; i < staticFieldInfos.size(); i++) {
             StaticFieldInfo<T> fieldInfo = staticFieldInfos.get(i);
             T value = fieldInfo.getValue();
             array[i] = fieldInfo.getValue();
             value.values = array;
             value.ordinal = i;
-            value.maxOrdinal = staticFieldInfos.size()-1;
-            value.genericTree = fieldInfo.getGenericTree();
+            if(value.genericTree == null) {
+                value.genericTree = fieldInfo.getGenericTree();
+            }
             if(value.name == null) {
                 value.name = fieldInfo.getFieldName();
             }
         }
 
-    }
-
-    protected T[] values;
-
-    @Override
-    public T[] values() {
-        return values.clone();
-    }
-
-    @Override
-    public int ordinal() {
-        return ordinal;
-    }
-
-    @Override
-    public int maxOrdinal() {
-        return maxOrdinal;
     }
 
     public GenericTree getGenericTree() {
@@ -72,7 +54,7 @@ public abstract class OrdinalFields<T extends OrdinalFields<T>>  implements Ordi
     }
 
     public Class<T> getParameterType() {
-        return getParameterTree().getaClass();
+        return getParameterTree().getGenericClass();
     }
 
     @Override

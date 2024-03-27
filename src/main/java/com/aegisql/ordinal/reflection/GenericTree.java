@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class GenericTree {
@@ -14,12 +15,12 @@ public class GenericTree {
     public static final int[] SIMPLE_MAP_VAL_PATH = new int[]{1};
 
     private final String name;
-    private  final Class aClass;
+    private  final Class genericClass;
 
     private final boolean isParametrized;
     private final List<GenericTree> genericSubTrees = new ArrayList<>();
 
-    public static GenericTree getGeneticInfo(Class cls, String fieldName) {
+    public static GenericTree getGenericInfo(Class cls, String fieldName) {
         try {
             Field field = cls.getField(fieldName);
             return new GenericTree(field);
@@ -50,7 +51,7 @@ public class GenericTree {
             } catch (ClassNotFoundException e) {
             }
         }
-        this.aClass = aClass;
+        this.genericClass = aClass;
     }
 
     private void collectGenericType(ParameterizedType parameterizedType, GenericTree parent) {
@@ -65,8 +66,8 @@ public class GenericTree {
         return name;
     }
 
-    public Class getaClass() {
-        return aClass;
+    public Class getGenericClass() {
+        return genericClass;
     }
 
     public List<GenericTree> getGenericSubTrees() {
@@ -84,7 +85,7 @@ public class GenericTree {
     @Override
     public String toString() {
 
-        StringBuilder sb = new StringBuilder(aClass == null ? name : aClass.getCanonicalName());
+        StringBuilder sb = new StringBuilder(genericClass == null ? name : genericClass.getCanonicalName());
 
         if(genericSubTrees.size() > 0) {
             sb.append('<');
@@ -103,7 +104,7 @@ public class GenericTree {
             return;
         }
         if(path == null || path.length == 0) {
-            test(aClass,o);
+            test(genericClass,o);
             return;
         }
         int pos = path[0];

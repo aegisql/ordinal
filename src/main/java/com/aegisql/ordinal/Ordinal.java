@@ -3,9 +3,11 @@ package com.aegisql.ordinal;
 import java.util.*;
 import java.util.stream.Stream;
 
-public interface Ordinal<T extends Ordinal<T>>  extends Comparable<Ordinal<T>> {
+public interface Ordinal<T extends Ordinal<T>>  extends Comparable<Ordinal<T>>, Iterable<T> {
     int ordinal();
-    int maxOrdinal();
+    default int maxOrdinal() {
+        return values().length-1;
+    }
 
     T[] values();
 
@@ -29,7 +31,7 @@ public interface Ordinal<T extends Ordinal<T>>  extends Comparable<Ordinal<T>> {
         if(ordinal() < maxOrdinal()) {
             return values()[ordinal()+1];
         } else {
-            return null;
+            throw new IndexOutOfBoundsException("You've reached max ordinal: "+maxOrdinal());
         }
     }
 
@@ -37,12 +39,36 @@ public interface Ordinal<T extends Ordinal<T>>  extends Comparable<Ordinal<T>> {
         if(ordinal() > 0) {
             return values()[ordinal()-1];
         } else {
-            return null;
+            throw new IndexOutOfBoundsException("You've reached min ordinal");
         }
     }
 
     default T valueAt(int pos) {
         return values()[pos];
+    }
+
+    @Override
+    default Iterator<T> iterator() {
+
+        T thisOrdinal = (T)this;
+
+        return new Iterator<T>() {
+            T ordinal = null;
+            @Override
+            public boolean hasNext() {
+                return ordinal == null ? thisOrdinal.ordinal() < thisOrdinal.maxOrdinal() : ordinal.ordinal() < ordinal.maxOrdinal();
+            }
+
+            @Override
+            public T next() {
+                if(ordinal == null) {
+                    ordinal = thisOrdinal;
+                } else {
+                    ordinal = ordinal.next();
+                }
+                return ordinal;
+            }
+        };
     }
 
 }

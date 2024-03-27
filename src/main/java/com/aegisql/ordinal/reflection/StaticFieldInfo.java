@@ -1,6 +1,7 @@
 package com.aegisql.ordinal.reflection;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class StaticFieldInfo<T> {
@@ -11,6 +12,8 @@ public class StaticFieldInfo<T> {
     private final T value;
     private final boolean isReady;
 
+    private final Containerize[] containerize;
+
     public StaticFieldInfo(T value, Field field) {
         Objects.requireNonNull(value,"StaticFieldInfo requires non null value");
         Objects.requireNonNull(field,"StaticFieldInfo requires a field instance");
@@ -19,6 +22,12 @@ public class StaticFieldInfo<T> {
             throw new RuntimeException("Field and value types must match. Value type "+value.getClass()+" expected field type "+fieldType);
         }
         fieldName = field.getName();
+        ContainerizeValues containerizeValues = field.getAnnotation(ContainerizeValues.class);
+        if(containerizeValues != null) {
+            this.containerize = containerizeValues.value();
+        } else {
+            this.containerize = new Containerize[]{};
+        }
         genericTree = new GenericTree(field);
         try {
             T fieldValue = (T) field.get(null);
@@ -54,6 +63,10 @@ public class StaticFieldInfo<T> {
         return isReady;
     }
 
+    public Containerize[] getContainerize() {
+        return containerize;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("StaticFieldInfo{");
@@ -61,6 +74,7 @@ public class StaticFieldInfo<T> {
         sb.append(", fieldType=").append(fieldType);
         sb.append(", genericTree=").append(genericTree);
         sb.append(", ready=").append(isReady);
+        sb.append(", containerize=").append(Arrays.toString(containerize));
         sb.append('}');
         return sb.toString();
     }

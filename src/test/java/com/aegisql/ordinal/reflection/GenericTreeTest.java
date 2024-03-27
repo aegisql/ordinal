@@ -28,7 +28,7 @@ class GenericTreeTest {
 
     @Test
     public void zeroLevelTest() {
-        var gt = GenericTree.getGeneticInfo(getClass(),"number");
+        var gt = GenericTree.getGenericInfo(getClass(),"number");
         assertFalse(gt.isParametrized());
         System.out.println(gt);
 
@@ -40,7 +40,7 @@ class GenericTreeTest {
 
     @Test
     public void singleLevelGenericTreeTest() {
-        var gt = GenericTree.getGeneticInfo(getClass(),"listOfInteger");
+        var gt = GenericTree.getGenericInfo(getClass(),"listOfInteger");
         assertTrue(gt.isParametrized());
         var sub = gt.getGenericTree(0);
         assertFalse(sub.isParametrized());
@@ -56,7 +56,7 @@ class GenericTreeTest {
 
     @Test
     public void doubleLevelGenericTreeTest() {
-        var gt = GenericTree.getGeneticInfo(getClass(),"mapOfIntegers");
+        var gt = GenericTree.getGenericInfo(getClass(),"mapOfIntegers");
         var sub1 = gt.getGenericTree(0);
         var sub2 = gt.getGenericTree(1);
         System.out.println(gt);
@@ -75,7 +75,7 @@ class GenericTreeTest {
 
     @Test
     public void threeLevelGenericTreeTest() {
-        var gt = GenericTree.getGeneticInfo(getClass(),"mapOfListOfIntegers");
+        var gt = GenericTree.getGenericInfo(getClass(),"mapOfListOfIntegers");
         var sub1 = gt.getGenericTree(0);
         var sub2 = gt.getGenericTree(1);
         var sub21 = gt.getGenericTree(1).getGenericTree(0);
@@ -98,8 +98,8 @@ class GenericTreeTest {
 
     @Test
     public void understandOuterInnerTest() {
-        var gtOuter = GenericTree.getGeneticInfo(getClass(),"outer");
-        var gtInner = GenericTree.getGeneticInfo(getClass(),"inner");
+        var gtOuter = GenericTree.getGenericInfo(getClass(),"outer");
+        var gtInner = GenericTree.getGenericInfo(getClass(),"inner");
 
         System.out.println(gtOuter);
         System.out.println(gtInner);
