@@ -2,6 +2,12 @@ package com.aegisql.ordinal.multimethod;
 
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 class Function3Test {
 
     public String sum(int x, int y, int z) {
@@ -40,4 +46,5 @@ class Function3Test {
         System.out.println(dispatch.apply(1,2,3));
         System.out.println(dispatch.apply(1,2,4));
     }
+
 }
