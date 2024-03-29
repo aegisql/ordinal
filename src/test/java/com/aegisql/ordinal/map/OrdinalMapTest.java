@@ -15,7 +15,7 @@ class OrdinalMapTest {
     @Test
     public void basicOrdinalMapTest() {
 
-        var map = new OrdinalMap<OrdinalHolder<String>,Integer>(DAYS);
+        var map = new OrdinalMap<OrdinalHolder<String>,Integer>(List.of(DAYS));
         assertTrue(map.isEmpty());
         map.put(MONDAY,10);
         assertEquals(1,map.size());

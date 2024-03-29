@@ -212,26 +212,30 @@ public class OrdinalMap <K extends Ordinal<K>, V> implements Map<K,V>, Cloneable
 
     private final Class<K> keyType;
 
+    private final K[] keys;
+
     public OrdinalMap(K[] elements) {
         Objects.requireNonNull(elements,"OrdinalMap requires sample of elements");
         entry = new OrdinalEntry[elements.length];
         keyType = (Class<K>) elements[0].getClass();
+        this.keys = elements;
     }
 
     public OrdinalMap(Collection<K> elements) {
         Objects.requireNonNull(elements,"OrdinalMap requires sample of elements");
         entry = new OrdinalEntry[elements.size()];
         keyType = (Class<K>) elements.iterator().next().getClass();
-    }
-
-    public OrdinalMap(Class<K> cls, int size) {
-        entry = new OrdinalEntry[size];
-        keyType = cls;
+        this.keys = (K[]) Array.newInstance(keyType,elements.size());
+        var iterator = elements.iterator();
+        for(int i = 0; i < elements.size(); i++) {
+            keys[i] = iterator.next();
+        }
     }
 
     public OrdinalMap(K instance) {
         entry = new OrdinalEntry[instance.maxOrdinal()+1];
         keyType = (Class<K>) instance.getClass();
+        this.keys = instance.values();
     }
 
     @Override
@@ -329,6 +333,10 @@ public class OrdinalMap <K extends Ordinal<K>, V> implements Map<K,V>, Cloneable
         OrdinalEntry<K, V>[] clone = entry.clone();
         var set = new UnmodifiableOrdinalSet<>((Ordinal[])clone);
         return set;
+    }
+
+    public K[] getKeys() {
+        return keys;
     }
 
     @Override

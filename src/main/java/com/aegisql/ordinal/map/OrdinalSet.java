@@ -16,10 +16,6 @@ public class OrdinalSet <K extends Ordinal<K>> implements Set<K> {
         this(new OrdinalMap<>(elements));
     }
 
-    public OrdinalSet(Class<K> cls, int size) {
-        this(new OrdinalMap<>(cls,size));
-    }
-
     public OrdinalSet(K instance) {
         this(new OrdinalMap<>(instance));
     }
